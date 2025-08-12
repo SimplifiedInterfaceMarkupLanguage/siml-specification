@@ -1,0 +1,14 @@
+siml.html {
+  head {
+    title "This is the title of the webpage!";
+  }
+
+  body {
+    p [
+      This is an example paragraph. 
+      Anything in the {strong "body";} tag 
+      will appear on the page, 
+      just like this {strong "p";} tag and its contents.
+    ]
+  }
+}
