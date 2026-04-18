@@ -1,0 +1,55 @@
+(* !!! SPACING CONVENTION !!! *) 
+(* Assume that between any non-ws tokens is inserted [ws] *)
+(* -ws measn no ws token *)
+
+(* === BASE TOKENS === *)
+
+ws = "\n" | "\r" | " " | "\t";
+
+document = [ws] value [ws] ?EOF?;
+
+(* !!! Comment are not allowed inside strings !!! *)
+comment = "//" ?any until newline? 
+        | "/*" ?any until "*/"?;
+
+(* === COMMON TOKENS === *)
+letter = ?single letter, like A-Z or a-z for english locale?;
+
+digit = ?any digit from 0 to 9?;
+
+identifier = letter { letter | digit };
+
+integer = digit -ws {digit}; 
+
+(* support for "a", "a.", "a.b", ".b" *)
+number = ( integer -ws ["." -ws [integer]] ) 
+         | ( "." -ws integer ); 
+
+string = "\""
+         -ws { 
+           ?any symbol except "\\"? 
+           | ("\\" ?any symbol?) 
+         }
+         -ws "\""
+
+
+(* === PARSING CORE === *)
+
+(* component contains subvalue and requirement of ";" depends on that value *)
+value = (component | complex_value | primitive_value) 
+        {"," value} [","]; (* inline list support *)
+
+complex_value = (object | interpolated_string) [";"];
+
+primitive_value = (string | number | identifier) ";";
+
+component = identifier value;
+
+object = "{" {object_property | value} "}";
+object_property = "." -ws identifier ":" value;
+
+interpolated_string = "[" { 
+                        ~["$"] 
+                        | "$$" 
+                        | ("$" value) 
+                      } "]";
